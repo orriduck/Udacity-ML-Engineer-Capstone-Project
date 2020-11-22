@@ -99,7 +99,9 @@ As proposed in previous section, we are going to convert the commit subject and 
 
 ## Benchmark Model
 
-There is no benchmark model that I found to this specific problem. 
+Given that there is not much previous work has been found regarding to solve this issue, I've created a simple `linear_learner` work as binary classifier and treat it as our benchmark. The classifier used the features that described from section `label_distribution`, and treat them all as binary values.
+
+After 15 epochs model training, we've acquired our benchmark model who has reached 100% recall and 83.1% precision for good commit messages. The accuracy of the whole classification task is 97.3%, which is pretty good.
 
 ## Evaluation Metrics
 
