@@ -2,3 +2,4 @@ credentials
 data
 **checkpoints**
 **vscode**
+__pycache__
