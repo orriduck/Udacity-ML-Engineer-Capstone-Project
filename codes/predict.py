@@ -4,10 +4,7 @@ import sys
 import pandas as pd
 import numpy as np
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.utils.data
+import tensorflow as tf
 
 from io import StringIO
 from six import BytesIO
@@ -20,30 +17,14 @@ CONTENT_TYPE = 'application/x-npy'
 
 
 def model_fn(model_dir):
-    """Load the PyTorch model from the `model_dir` directory."""
-    print("Loading model.")
-
-    # First, load the parameters used to create the model.
-    model_info = {}
-    model_info_path = os.path.join(model_dir, 'model_info.pth')
-    with open(model_info_path, 'rb') as f:
-        model_info = torch.load(f)
-
-    print("model_info: {}".format(model_info))
-
-    # Determine the device and construct the model.
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = SimpleNet(model_info['input_dim'], model_info['hidden_dim'], model_info['output_dim'])
-
-    # Load the stored model parameters.
-    model_path = os.path.join(model_dir, 'model.pth')
-    with open(model_path, 'rb') as f:
-        model.load_state_dict(torch.load(f))
-
-    # prep for testing
-    model.to(device).eval()
-
-    print("Done loading model.")
+    """
+    This is the function that sagemaker used to load the model from a specific directory
+    """
+    model_path = os.path.join(model_dir, "tensorflow_mdodel/1")
+    assert os.path.exists(model_path), f"{model_path} does not exists, please recheck the model path"
+    print(f"Loading model from path {model_path}")
+    model = tf.keras.models.load_model(os.path.join(model_dir, "tensorflow_model/1"))
+    print("Successfully Load Model")
     return model
 
 def input_fn(serialized_input_data, content_type):
@@ -63,19 +44,9 @@ def output_fn(prediction_output, accept):
 
 def predict_fn(input_data, model):
     print('Predicting class labels for the input data...')
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
     # Process input_data so that it is ready to be sent to our model
     # convert data to numpy array then to Tensor
-    data = torch.from_numpy(input_data.astype('float32'))
-    data = data.to(device)
-
     # Put model into evaluation mode
-    model.eval()
-
+    prediction = model.predict(input_data)
     # Compute the result of applying the model to the input data.
-    out = model(data)
-    # The variable `result` should be a numpy array; a single value 0-1
-    result = out.cpu().detach().numpy()
-
-    return result
+    return prediction

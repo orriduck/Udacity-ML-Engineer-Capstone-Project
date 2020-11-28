@@ -14,10 +14,10 @@ def model_fn(model_dir):
     """
     This is the function that sagemaker used to load the model from a specific directory
     """
-    model_path = os.path.join(model_dir, "model.hdf5")
+    model_path = os.path.join(model_dir, "tensorflow_mdodel/1")
     assert os.path.exists(model_path), f"{model_path} does not exists, please recheck the model path"
     print(f"Loading model from path {model_path}")
-    model = tf.kears.models.load_model(model_path)
+    model = tf.keras.models.load_model(os.path.join(model_dir, "tensorflow_model/1"))
     print("Successfully Load Model")
     return model
 
@@ -27,23 +27,29 @@ def train(model, train_data_feature, train_data_label, validation_data, epochs=1
     """
     This is the training method that is called by the tensorflow training script
     """
-    model.summary()
     
-    model_path = os.path.join(model_dir, "model.hdf5")
-    print(f"Model will be saved to {model_path} ...")
+#     model_path = os.path.join(model_dir, "tensorflow_ckpt/1/model.hdf5")
+#     if not os.path.exists(os.path.dirname(model_path)):
+#         os.makedirs(os.path.dirname(model_path), exist_ok=True)
+#         print(f"Created checkpoint folder {os.path.dirname(model_path)} to save model")
+#     print(f"Model will be saved to {model_path} ...")
     
-    ckpt = tf.keras.callbacks.ModelCheckpoint(
-        model_path, monitor='val_loss', verbose=1, save_best_only=True, 
-        mode='auto', save_freq='epoch', options=None
-    )
+#     ckpt = tf.keras.callbacks.ModelCheckpoint(
+#         model_path, monitor='val_loss', verbose=1, save_best_only=True, 
+#         mode='auto', save_freq='epoch', options=None
+#     )
+
+    print("Model saved to {}".format(os.path.join(args.model_dir, "tensorflow_model/1")))
     
     model.fit(
         x=train_data_feature, y=train_data_label, 
         validation_data=validation_data,
         epochs=epochs, verbose=verbose,
-        shuffle=True, batch_size=batch_size,
-        callbacks = [ckpt]
+        shuffle=True, batch_size=batch_size
     )
+    
+    model.save(os.path.join(args.model_dir, "tensorflow_model/1"), save_format="tf")
+    
     
 def acquire_inputs(input_data_dict):
     """
