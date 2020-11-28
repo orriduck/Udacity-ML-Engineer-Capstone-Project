@@ -176,7 +176,7 @@ I take a deep look into the false positive and false negative samples, here are 
 #### False Positive Samples
 The following picture shows the first 15 samples which identified as False Positive, along with the statistics for all the FP sampeles, the `prediction` column is the prediction from neural network, `good_message` column is the label created from rule-based system.
 
-We may observed from the statistics that among the FP samples, all the cases are related to either the imperative mood or identifier rule failed to satisfied, which belongs to the case that we mentioned, there is a chance that the rule-base system missed out something. As you review these 15 samples, I think they are make sense from human perspective, since they are related to mentioning the fixing, implementation and remove stuff. We have to review more samples to confirm our suspect but it will be promising that the neural network actually captured the commit message that the rule-based system didn't find。
+We may observed from the statistics that among the FP samples, all the cases are related to either the imperative mood or identifier rule failed to satisfied, which belongs to the case that we mentioned, there is a chance that the rule-base system missed out something. As you review these 15 samples, I think they are make sense from human perspective, since they are related to mentioning the fixing, implementation and remove stuff. We have to review more samples to confirm our suspect but it will be promising that the neural network actually captured the commit message that the rule-based system didn't find.
 
 ![](imgs/FP_samples.png)
 
@@ -194,7 +194,7 @@ In summary, we have the following conclusion:
 
 In futurework, there are some additional idea which can be implemented in order to increase the accuracy of the whole system:
 1. Use nerual network to build a raw classifier, and then use the rules as post-processing.
-2. Use more complex model architecture, like textCNN or RNN to process the text feature, but it may require more data comes in
+2. Use more complex model architecture, like textCNN or RNN to process the text feature, but it may require more data comes in.
 
 ## Reference
 
