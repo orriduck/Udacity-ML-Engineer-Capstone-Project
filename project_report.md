@@ -27,15 +27,15 @@ For this project, I will be mainly focus on creating a simple classification mod
 6. Capitalize the subject line and each paragraph
 7. Use the imperative mood in the subject line
 
-We would need to convert the whole commit body to the text or statistical features and train a small neural network model to output the probability.
+I would need to convert the whole commit body to the text or statistical features and train a small neural network model to output the probability.
 
 ## Data Analysis
 
-As mentioned in [4], Google Bigquery is now the place that stores and expose the commit messages data to the public, thus, we will be using it as our data source. In order to successfully acquire the data, we would need to register the authentication and acquire the credential file before we can make queries in the sagemaker notebook instance.
+As mentioned in [4], Google Bigquery is now the place that stores and expose the commit messages data to the public, thus, I will be using it as our data source. In order to successfully acquire the data, I would need to register the authentication and acquire the credential file before I can make queries in the sagemaker notebook instance.
 
 ![](imgs/data_schema.jpg)
 
-As mentioned in this table, we will use commiter's name, commit time as Identifier, subject and message as feature. As of the dependent variable, we will use the following rules to create:
+As mentioned in this table, I will use commiter's name, commit time as Identifier, subject and message as feature. As of the dependent variable, I will use the following rules to create:
 
 - If it has the identifier of the commit message like (fix, update, etc.)
 - If the commit subject is over length
@@ -45,9 +45,9 @@ As mentioned in this table, we will use commiter's name, commit time as Identifi
 
 ### Overview of the Dataset
 
-Specifically, this is the google big query that we've used, considering the trade-off between cost and capability, we fetched the first 1M records from the commit message table.
+Specifically, this is the google big query that I've used, considering the trade-off betIen cost and capability, I fetched the first 1M records from the commit message table.
 
-In addition to this, considering that some commit message is too small or large, which will hugely impact the size of the dataset file and difficulty that we read, by manually reviewing those super long commit message, they are more likely presenting a technical detail, which I don't think should be seriously considered in this project, so we set 6 and 200 as threshold for filtering the length of the text.
+In addition to this, considering that some commit message is too small or large, which will hugely impact the size of the dataset file and difficulty that I read, by manually reviewing those super long commit message, they are more likely presenting a technical detail, which I don't think should be seriously considered in this project, so I set 6 and 200 as threshold for filtering the length of the text.
 
 ```sql
 SELECT committer.name, committer.time_sec, subject, message
@@ -59,7 +59,7 @@ LIMIT 1000000
 
 By checking the commit subject and message body, here are some information about the dataset and feature quality, among 1M records
 
-- There are 0 null-values in the records that we fetched, for both subject and message.
+- There are 0 null-values in the records that I fetched, for both subject and message.
 - 10.95% of the subjects are same as the commit messages.
 - Picking `\n\n` as delimiter to split the commit message into segments, there are 20.33% messages has multiple segments, and there are 30.65% subjects are identical to the first segment of commit messages.
 
@@ -69,7 +69,7 @@ The length distribution of the subject, full message, and first segment of the m
 
 ### Label Distribution
 
-According to the previous section, we use the following rules to filter out the good commit message:
+According to the previous section, I use the following rules to filter out the good commit message:
 
 - **Identifier**: The "commit identifiers", including `{'implement', 'polish', 'remove', 'refactor', 'add', 'fix', 'rework', 'rename', 'resolve', 'merge', 'update'}` , at least one of them existed in the subject or first segment message
 - **Length_ok**: Commit subject is less then 50 characters
@@ -85,7 +85,7 @@ Around 1/10 Samples are good messages, identifier rule is the most difficult rul
 
 ## Algorithms
 
-In total, including the way we create the dependant variable, we've used three ways to estimate if a commit message is a good one, specifically we have
+In total, including the way I create the dependant variable, I've used three ways to estimate if a commit message is a good one, specifically I have
 1. A rule based system (as our benchmark)
 2. A binary classification model based on the rule feature (as another benchmark)
 3. A neural network which ingests some of the rule-basd feature and text features as input (as our experiment model structure)
@@ -94,35 +94,92 @@ In total, including the way we create the dependant variable, we've used three w
 
 #### Rule Based System
 
-As described in previous section, we created 5 rule feature for a commit message, the rule based system basically announce that the commit message will be a good one if this commit message body (including subject) satistifed all the rule feature. 
+As described in previous section, I created 5 rule feature for a commit message, the rule based system basically announce that the commit message will be a good one if this commit message body (including subject) satistifed all the rule feature. 
 
-The advantage of this system is that the implementation is pretty easy, and the result is easily explainable, while on the other side, given that we have a limited amount of identifier, and the imperative mood is not as easy to judge as we use this rule, we may lose a large amount of good commit message.
+The advantage of this system is that the implementation is pretty easy, and the result is easily explainable, while on the other side, given that I have a limited amount of identifier, and the imperative mood is not as easy to judge as I use this rule, I may lose a large amount of good commit message.
 
 #### LinearLearner from Sagemaker
 
-For this benchmark model, we simply takes the rule feature and feed to a `LinearLearner` which we expect to create a binary classifier from it. I didn't dig into ther performance evaluation it for too much given that the best of what it can reach is to reach the same performance level to the rule-based system. And given that it's using the exact same input feature, it won't help if we expect to have the answer to some questions like, if there will be a chance that the rule based system is wrong.
+For this benchmark model, I simply takes the rule feature and feed to a `LinearLearner` which I expect to create a binary classifier from it. I didn't dig into ther performance evaluation it for too much given that the best of what it can reach is to reach the same performance level to the rule-based system. And given that it's using the exact same input feature, it won't help if I expect to have the ansIr to some questions like, if there will be a chance that the rule based system is wrong.
 
 ### Methodology to Create Experiment Model
 
-Given that we have less confidence that rule-based feature `identifier` and `imperative_mood` is a good one since there must be some cases that human may missed out, for the experimental model, the neural network is designed to ingest both text feature (including the subject and first segment of commit message) and some of the reliable rule based features (like captialization, no period end, and length qualification). We will provide more details in the following sub-sections. In summary, we are taking the following five features:
+Given that I have less confidence that rule-based feature `identifier` and `imperative_mood` is a good one since there must be some cases that human may missed out, for the experimental model, the neural network is designed to ingest both text feature (including the subject and first segment of commit message) and some of the reliable rule based features (like captialization, no period end, and length qualification). 
+
+I will provide more details in the following sub-sections. In summary, I are taking the following five features:
 - subject text (--> sequence)
 - first segment commit message text (--> sequence)
 - length_ok (--> binary)
 - not period end (--> binary)
 - capital first token (--> binary)
 
-
 #### Data Preprocessing
 
-As we need to ingest text feature, we need to sequentialize the texts for both subject and first segment commit message. Given the limitation of computation power, instead of using two seperate tokenizer for each of them, we used one tokenizer to fit 
+As I need to ingest text feature, I need to sequentialize the texts for both subject and first segment commit message. Given the limitation of computation poIr, instead of using two seperate tokenizer for each of them, I used one tokenizer to fit both two text features. 
+
+By inspecting the training set, I have recognized that there are 243430 unique tokens, I don't want to include all of them into the tokenizer because its generally not a realistic strategy since the space of token will be huge if the corpus size increase. 100000 is the number I choose for the tokenizer
+
+Using this code snippet, I've successfully created the tokenizer that I expected.
+
+```python
+tokenizer = Tokenizer(num_words=100000, loIr=True, oov_token="<unk>")
+```
+After initializing the tokenizer, a feature convert process is created to transform the text into a padded sequence, the following code snippet is used to handle this task. After the text feature has been handled, I concatenate these features with rule features, and make the final array for training.
+
+```python
+MAX_LEN = 200 # As I did the cut-off from the data acquiring stage
+
+TRANSFORMED_FEATURES_DICT[col] = pad_sequences(tokenizer.texts_to_sequences(focus_texts), maxlen=MAX_LEN, padding="post", truncating="post")
+```
 
 #### Create Model
 
+On the aspect of model, I create the model having the following workflow
+
+1. Split the input tensor into two parts, one for text features (dimenion is 400, 200 for each feature), the other part for rule feature (dimension is 3). This is because our input file that I used for sagemaker training job is a csv which concatenated two parts together, now I want to split them out
+2. For the text feature, go through a trainable embedding layer and global max pooling layer to reduce the dimension back to 1D. The goal of producing these two layers are A. convert the text feature to an embedding vector which may capture the semantic information hidden from these sentence B. Reduce the dimension of vector to a proper size which can be used to concatenate with rule features
+    - **Why don't I use the pre-trained embedding?** I think the language we used for commit message is more likely to be domain specific, thus, using a pre-trained embedding model which fit on the daily used language may not be a good strategy.
+3. Concatenate two parts of features, go through a small fully connected layer, then output a sigmoid value of this layer as the prediction.
+
+#### Pros and Cons for Model
+
+This model architecture has two feature advantage:
+- Thanks to the customized embedding layer, this model can support a very domain specific task and capture the special meaning of some identifiers like 'style', 'feat' and 'chrore'
+- The dimension reduction then concatenate strategy is a good strategy for feature fusion
+
+There are also cons for this model, including:
+- The customized, trainable embedding layer weight can introduce a large amount of time in training phase
+- Though we have dimension reduction, the dimension for rule-feature is such small that it's hard to make them producee significant impact
+
 ## Results
+
+For model evaluation, I compared the precison, recall, and count of samples that falls into False-Positive and False-Negative area. Specifically for the experiemental neural network, I dig deeper into the results to check for those misaligned samples, why the nerual network failed to align, is it because of the failure of the neural network, or there are indeed some samples that the rule-based system failed to capture.
 
 ### Metrics Comparison
 
+The following table shows the performance against the rule based system
+
+| Model | Alignment (Acc) | Precision | Recall | FP-Samples | FN-Samples | 
+|-------|-----------------|-----------|--------|------------|------------|
+| Rules | 100% | Benchmark | Benchmark | Benchmark | Benchmark |
+| LinearLearner | 97.3% | 83.1% | 100% | 6859 | 0 |
+| Neural-Network | 96.6% | 86.7% | 88.7 | 4586 | 3831 |
+
+It's obvious that the linear has closer alignment to the rule based system, given that this model is using the exact same feature as the rule-based system did. However, there are still some samples that this binary classifier failed to align, which means there will be still hidden information, which should be required by linearlearner to use, in order to give a good prediction.
+
+Compared to LinearLearner Model, neural network used 3.6% precision in exhanged of 10% recall, however, it's likely that there some samples that the rule-based system missed out. We will need to take a deep look into those samples.
+
 ### Analysis on Misalign
+
+I take a deep look into the false positive and false negative samples, here are some observations corresponding to them.
+
+#### False Positive Samples
+The following picture is the 
+![](imgs/FP_samples.png)
+
+
+#### False Negative Samples
+![](imgs/FN_samples.png)
 
 ## Refinement and Conclusion
 
