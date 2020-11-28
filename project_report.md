@@ -1,4 +1,4 @@
-# Capstone Project Proposal
+# Capstone Project Report
 
 Chen Liang | For Machine Learning Engineer Nanodegree | 11.27.2020
 
@@ -174,14 +174,27 @@ Compared to LinearLearner Model, neural network used 3.6% precision in exhanged 
 I take a deep look into the false positive and false negative samples, here are some observations corresponding to them.
 
 #### False Positive Samples
-The following picture is the 
+The following picture shows the first 15 samples which identified as False Positive, along with the statistics for all the FP sampeles, the `prediction` column is the prediction from neural network, `good_message` column is the label created from rule-based system.
+
+We may observed from the statistics that among the FP samples, all the cases are related to either the imperative mood or identifier rule failed to satisfied, which belongs to the case that we mentioned, there is a chance that the rule-base system missed out something. As you review these 15 samples, I think they are make sense from human perspective, since they are related to mentioning the fixing, implementation and remove stuff. We have to review more samples to confirm our suspect but it will be promising that the neural network actually captured the commit message that the rule-based system didn't find。
+
 ![](imgs/FP_samples.png)
 
-
 #### False Negative Samples
+Speaking to the False Negative samples, seems like most of the commit message (at least from the first 15 samples) belongs to update. Thus my suspicion is that the embedding vector for update can be messed up, or it has been encoded to <unk> given the limitation of the vocabs the next step is to acquire more observations to find out if there is a pattern for these errors, then check how the text feature being encoded or transformed of those commit messages
+
 ![](imgs/FN_samples.png)
 
 ## Refinement and Conclusion
+
+In summary, we have the following conclusion:
+- Using neural network is a practical way to build a general good classifier for distinguish the good and bad commit message
+- Compared to the rule-based system, neural network model is easy to maintain, and indeed captured more valid cases that the rule-based system couldn't.
+- However, the neural network model also failed to capture some good commit messages, given that it's hard to explain so far, we have to make deeper look into the misclassified samples to find out why.
+
+In futurework, there are some additional idea which can be implemented in order to increase the accuracy of the whole system:
+1. Use nerual network to build a raw classifier, and then use the rules as post-processing.
+2. Use more complex model architecture, like textCNN or RNN to process the text feature, but it may require more data comes in
 
 ## Reference
 
