@@ -1,6 +1,6 @@
 # Capstone Project Proposal
 
-Chen Liang | For Machine Learning Engineer Nanodegree | 10.04.2020
+Chen Liang | For Machine Learning Engineer Nanodegree | 11.27.2020
 
 ## Overview
 
@@ -13,13 +13,13 @@ As a developer, we play with github nearly every day. It's highly likely that fo
 For this project, I will be mainly focus on creating a simple classification model which taking the commit message and subject as input, model will output a probabilty indicating if the commit message is a good one. Specifically, combining the knowledge from [2], a good commit message should obey the following rules:
 
 1. Specify the type of commit:
-    - feat: The new feature you're adding to a particular application
-    - fix: A bug fix
-    - style: Feature and updates related to styling
-    - refactor: Refactoring a specific section of the codebase
-    - test: Everything related to testing
-    - docs: Everything related to documentation
-    - chore: Regular code maintenance.[ You can also use emojis to represent commit types]
+    - `feat`: The new feature you're adding to a particular application
+    - `fix`: A bug fix
+    - `style`: Feature and updates related to styling
+    - `refactor`: Refactoring a specific section of the codebase
+    - `test`: Everything related to testing
+    - `docs`: Everything related to documentation
+    - `chore`: Regular code maintenance.[ You can also use emojis to represent commit types]
 2. Separate the subject from the body with a blank line
 3. Limit the subject line to 50 characters
 4. Remove unnecessary punctuation marks
@@ -55,6 +55,37 @@ FROM `bigquery-public-data.github_repos.commits`
 WHERE LENGTH(message) > 6 AND LENGTH(message) <= 200
 LIMIT 1000000
 ```
+### Text Features
+
+By checking the commit subject and message body, here are some information about the dataset and feature quality, among 1M records
+
+- There are 0 null-values in the records that we fetched, for both subject and message.
+- 10.95% of the subjects are same as the commit messages.
+- Picking `\n\n` as delimiter to split the commit message into segments, there are 20.33% messages has multiple segments, and there are 30.65% subjects are identical to the first segment of commit messages.
+
+The length distribution of the subject, full message, and first segment of the message is shown in the following graph
+
+![](imgs/length_distribution.png)
+
+### Label Distribution
+
+According to the previous section, we use the following rules to filter out the good commit message:
+
+- **Identifier**: The "commit identifiers", including `{'implement', 'polish', 'remove', 'refactor', 'add', 'fix', 'rework', 'rename', 'resolve', 'merge', 'update'}` , at least one of them existed in the subject or first segment message
+- **Length_ok**: Commit subject is less then 50 characters
+- **Not_period_end**: No period in the end of the subject
+- **Imperative_mood**: First all-alphabet character token in subject is a verb
+- **Capital_first_token**: The first token of commit subject and first segment message is capitalized
+
+If all five rules are satisfied, this commit message would be tagged as a good message, given these rules, the label distribution shows in the belowing table:
+
+![](imgs/label_distribution.png)
+
+Around 1/10 Samples are good messages, identifier rule is the most difficult rule to satisfy, which there are only around 36% samples match the requirement.
+
+## Algorithms
+
+
 
 ## Reference
 
