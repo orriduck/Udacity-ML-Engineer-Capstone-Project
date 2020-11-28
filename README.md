@@ -15,3 +15,6 @@ You may need the following stuff to replicate the result
 - A google bigquery credential file to allow you make the query from notebook.
 
 Once you have them, simply run `data_eda_and_baseline_model.ipynb` and then `ml_pipeline.ipynb`, I expect that you may acuquire a similar experiment result as I did, the result may be slightly different given that the database is keep updating new commit message.
+
+## Reference
+For more information, please reference to `project_proposal.md` and `project_report.md`
