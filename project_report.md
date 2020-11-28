@@ -85,7 +85,46 @@ Around 1/10 Samples are good messages, identifier rule is the most difficult rul
 
 ## Algorithms
 
+In total, including the way we create the dependant variable, we've used three ways to estimate if a commit message is a good one, specifically we have
+1. A rule based system (as our benchmark)
+2. A binary classification model based on the rule feature (as another benchmark)
+3. A neural network which ingests some of the rule-basd feature and text features as input (as our experiment model structure)
 
+### Benchmark Models
+
+#### Rule Based System
+
+As described in previous section, we created 5 rule feature for a commit message, the rule based system basically announce that the commit message will be a good one if this commit message body (including subject) satistifed all the rule feature. 
+
+The advantage of this system is that the implementation is pretty easy, and the result is easily explainable, while on the other side, given that we have a limited amount of identifier, and the imperative mood is not as easy to judge as we use this rule, we may lose a large amount of good commit message.
+
+#### LinearLearner from Sagemaker
+
+For this benchmark model, we simply takes the rule feature and feed to a `LinearLearner` which we expect to create a binary classifier from it. I didn't dig into ther performance evaluation it for too much given that the best of what it can reach is to reach the same performance level to the rule-based system. And given that it's using the exact same input feature, it won't help if we expect to have the answer to some questions like, if there will be a chance that the rule based system is wrong.
+
+### Methodology to Create Experiment Model
+
+Given that we have less confidence that rule-based feature `identifier` and `imperative_mood` is a good one since there must be some cases that human may missed out, for the experimental model, the neural network is designed to ingest both text feature (including the subject and first segment of commit message) and some of the reliable rule based features (like captialization, no period end, and length qualification). We will provide more details in the following sub-sections. In summary, we are taking the following five features:
+- subject text (--> sequence)
+- first segment commit message text (--> sequence)
+- length_ok (--> binary)
+- not period end (--> binary)
+- capital first token (--> binary)
+
+
+#### Data Preprocessing
+
+As we need to ingest text feature, we need to sequentialize the texts for both subject and first segment commit message. Given the limitation of computation power, instead of using two seperate tokenizer for each of them, we used one tokenizer to fit 
+
+#### Create Model
+
+## Results
+
+### Metrics Comparison
+
+### Analysis on Misalign
+
+## Refinement and Conclusion
 
 ## Reference
 
