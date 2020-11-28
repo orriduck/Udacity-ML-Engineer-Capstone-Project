@@ -3,3 +3,4 @@ data
 **checkpoints**
 **vscode**
 **__pycache__**
+model.hdf5
